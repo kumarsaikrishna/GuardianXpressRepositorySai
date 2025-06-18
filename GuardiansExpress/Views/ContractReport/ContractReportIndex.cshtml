@@ -1,0 +1,182 @@
+﻿@model IEnumerable<GuardiansExpress.Models.Entity.ContractEntity>
+
+@{
+    ViewData["Title"] = "Contract Report";
+}
+
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="container-full">
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-12 mt-3">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4 class="card-title">Contract Report</h4>
+
+                            </div>
+
+                            <div class="card-body">
+                                @if (TempData["ErrorMessage"] != null)
+                                {
+                                    <div class="alert alert-danger">
+                                        @TempData["ErrorMessage"]
+                                    </div>
+                                }
+
+                                <form asp-action="Search" method="post" id="searchForm">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Branch Name</label>
+                                                <select name="branchName" class="form-control">
+                                                    <option value="">-- All Branches --</option>
+                                                    @foreach (var branch in ViewBag.UniqueBranchNames as List<string>)
+                                                    {
+                                                        <option value="@branch" selected="@(ViewBag.SelectedReferenceName == branch)">@branch</option>
+                                                            @branch
+                                                       
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Reference Name</label>
+                            <select name="referenceName" class="form-control">
+                                <option value="">-- All References --</option>
+                                @foreach (var reference in ViewBag.UniqueReferenceNames)
+                                {
+                                    <option value="@reference" selected="@(ViewBag.SelectedReferenceName == reference)">@reference</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Invoice Type</label>
+                            <select name="invoiceType" class="form-control">
+                                <option value="">-- All Types --</option>
+                                @foreach (var type in ViewBag.UniqueInvoiceTypes)
+                                {
+                                    <option value="@type" selected="@(ViewBag.SelectedInvoiceType == type)">@type</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Contract Type</label>
+                            <select name="contractType" class="form-control">
+                                <option value="">-- All Types --</option>
+                                @foreach (var type in ViewBag.UniqueContractTypes)
+                                {
+                                    <option value="@type" selected="@(ViewBag.SelectedContractType == type)">@type</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Temporary Close</label>
+                            <select name="tempClose" class="form-control">
+                                <option value="">-- All --</option>
+                                <option value="true" selected="@(ViewBag.SelectedTempClose == true)">Closed</option>
+                                <option value="false" selected="@(ViewBag.SelectedTempClose == false)">Active</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                        @if (Model != null && Model.Any())
+                        {
+                            <a href="@Url.Action("ExportToExcel", new {
+                                branchName = ViewBag.SelectedBranchName,
+                                referenceName = ViewBag.SelectedReferenceName,
+                                invoiceType = ViewBag.SelectedInvoiceType,
+                                contractType = ViewBag.SelectedContractType,
+                                tempClose = ViewBag.SelectedTempClose
+                            })" class="btn btn-success">Export to Excel</a>
+
+                            <a href="@Url.Action("ExportToPdf", new {
+                                branchName = ViewBag.SelectedBranchName,
+                                referenceName = ViewBag.SelectedReferenceName,
+                                invoiceType = ViewBag.SelectedInvoiceType,
+                                contractType = ViewBag.SelectedContractType,
+                                tempClose = ViewBag.SelectedTempClose
+                            })" class="btn btn-danger">Export to PDF</a>
+                        }
+                      </div>
+                   </div>
+                </form>
+            </div>
+          
+
+    @if (Model != null)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h5>Report Results</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Contract ID</th>
+                                    <th>Branch Name</th>
+                                    <th>Client Name</th>
+                                    <th>Reference Name</th>
+                                    <th>Invoice Type</th>
+                                    <th>Contract Type</th>
+                                    <th>Invoice No</th>
+                                    <th>Contract End Date</th>
+                                    <th>Temp Close</th>
+                                    <th>Auto Invoice</th>
+                                    <th>End Rental</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.ContractId</td>
+                                        <td>@item.BranchName</td>
+                                        <td>@item.ClientName</td>
+                                        <td>@item.ReferenceName</td>
+                                        <td>@item.InvoiceType</td>
+                                        <td>@item.ContractType</td>
+                                        <td>@(item.ContractEndDate?.ToString("dd/MM/yyyy"))</td>
+                                        <td>@(item.TempClose == true ? "Yes" : "No")</td>
+                                        <td>@(item.AutoInvoice == true ? "Yes" : "No")</td>
+                                        <td>@(item.EndRental == true ? "Yes" : "No")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        No contracts found matching the search criteria.
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function resetForm() {
+            document.getElementById("searchForm").reset();
+            window.location.href = '@Url.Action("ContractReportIndex")';
+        }
+    </script>
+}
